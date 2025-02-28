@@ -10,62 +10,76 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background-color: #007BFF; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
-        .yes { color: green; font-weight: bold; }
-        .no { color: red; font-weight: bold; }
+        .btn { padding: 5px 10px; cursor: pointer; }
+        .add-btn { background-color: green; color: white; }
+        .delete-btn { background-color: red; color: white; }
     </style>
 </head>
 <body>
     <h2>Match Schedule</h2>
     <table id="scheduleTable">
         <thead>
-            <tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Time</th><th>Status</th></tr>
+            <tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Time</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody></tbody>
     </table>
+    <button class="btn add-btn" onclick="addRow('schedule')">Add Match</button>
     
     <h2>Player Availability</h2>
     <table id="availabilityTable">
         <thead>
-            <tr><th>Player Name</th><th>Match Date</th><th>Availability</th><th>Comments</th></tr>
+            <tr><th>Player Name</th><th>Match Date</th><th>Availability</th><th>Comments</th><th>Actions</th></tr>
         </thead>
         <tbody></tbody>
     </table>
+    <button class="btn add-btn" onclick="addRow('availability')">Add Player</button>
     
     <script>
-        const API_KEY = "YOUR_GOOGLE_SHEETS_API_KEY";
-        const SHEET_ID = "YOUR_GOOGLE_SHEET_ID";
-        const SCHEDULE_RANGE = "Schedule!A2:E";
-        const AVAILABILITY_RANGE = "Player Availability!A2:D";
-        
-        async function fetchSheetData(range, tableId) {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                populateTable(data.values, tableId);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
+        const GITHUB_RAW_URL = "https://raw.githubusercontent.com/vinuthm3190/iccwsc-schedule/main/schedule.json";
+
+        async function fetchData() {
+            const response = await fetch(GITHUB_RAW_URL);
+            const data = await response.json();
+            populateTable(data.schedule, "scheduleTable");
+            populateTable(data.availability, "availabilityTable");
         }
         
         function populateTable(data, tableId) {
             const tableBody = document.querySelector(`#${tableId} tbody`);
             tableBody.innerHTML = "";
-            data.forEach(row => {
+            data.forEach((row, index) => {
                 const tr = document.createElement("tr");
-                row.forEach(cell => {
+                Object.values(row).forEach(value => {
                     const td = document.createElement("td");
-                    td.textContent = cell;
-                    if (cell === "✅ Yes") td.classList.add("yes");
-                    if (cell === "❌ No") td.classList.add("no");
+                    td.textContent = value;
                     tr.appendChild(td);
                 });
+                const actionTd = document.createElement("td");
+                actionTd.innerHTML = `<button class='btn delete-btn' onclick='deleteRow(${index}, "${tableId}")'>Delete</button>`;
+                tr.appendChild(actionTd);
                 tableBody.appendChild(tr);
             });
         }
+
+        function addRow(type) {
+            const tableBody = document.querySelector(`#${type}Table tbody`);
+            const tr = document.createElement("tr");
+            for (let i = 0; i < tableBody.parentElement.rows[0].cells.length - 1; i++) {
+                const td = document.createElement("td");
+                td.innerHTML = `<input type='text'/>`;
+                tr.appendChild(td);
+            }
+            const actionTd = document.createElement("td");
+            actionTd.innerHTML = `<button class='btn delete-btn' onclick='this.parentElement.parentElement.remove()'>Delete</button>`;
+            tr.appendChild(actionTd);
+            tableBody.appendChild(tr);
+        }
+
+        function deleteRow(index, tableId) {
+            document.querySelector(`#${tableId} tbody`).deleteRow(index);
+        }
         
-        fetchSheetData(SCHEDULE_RANGE, "scheduleTable");
-        fetchSheetData(AVAILABILITY_RANGE, "availabilityTable");
+        fetchData();
     </script>
 </body>
 </html>
