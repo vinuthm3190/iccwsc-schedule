@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule & Availability</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #007BFF; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .yes { color: green; font-weight: bold; }
+        .no { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Match Schedule</h2>
+    <table id="scheduleTable">
+        <thead>
+            <tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Time</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <h2>Player Availability</h2>
+    <table id="availabilityTable">
+        <thead>
+            <tr><th>Player Name</th><th>Match Date</th><th>Availability</th><th>Comments</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <script>
+        const API_KEY = "YOUR_GOOGLE_SHEETS_API_KEY";
+        const SHEET_ID = "YOUR_GOOGLE_SHEET_ID";
+        const SCHEDULE_RANGE = "Schedule!A2:E";
+        const AVAILABILITY_RANGE = "Player Availability!A2:D";
+        
+        async function fetchSheetData(range, tableId) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                populateTable(data.values, tableId);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        
+        function populateTable(data, tableId) {
+            const tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                row.forEach(cell => {
+                    const td = document.createElement("td");
+                    td.textContent = cell;
+                    if (cell === "✅ Yes") td.classList.add("yes");
+                    if (cell === "❌ No") td.classList.add("no");
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        fetchSheetData(SCHEDULE_RANGE, "scheduleTable");
+        fetchSheetData(AVAILABILITY_RANGE, "availabilityTable");
+    </script>
+</body>
+</html>
