@@ -1,0 +1,33 @@
+{
+    "schedule": [
+      {
+        "date": "2024-06-01",
+        "opponent": "Team A",
+        "venue": "Stadium 1",
+        "time": "10:00 AM",
+        "status": "Upcoming"
+      },
+      {
+        "date": "2024-06-08",
+        "opponent": "Team B",
+        "venue": "Stadium 2",
+        "time": "2:00 PM",
+        "status": "Upcoming"
+      }
+    ],
+    "availability": [
+      {
+        "player": "John Doe",
+        "match_date": "2024-06-01",
+        "availability": "Yes",
+        "comments": "Available all day"
+      },
+      {
+        "player": "Jane Smith",
+        "match_date": "2024-06-08",
+        "availability": "No",
+        "comments": "Out of town"
+      }
+    ]
+  }
+  
