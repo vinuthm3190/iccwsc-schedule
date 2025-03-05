@@ -35,8 +35,57 @@
     <button class="btn add-btn" onclick="addRow('availability')">Add Player</button>
     
     <script>
-        const GITHUB_API_URL = "https://api.github.com/repos/vinuthm3190/iccwsc-schedule/contents/schedule_availability.json";
+        const GITHUB_API_URL = "https://api.github.com/repos/vinuthm3190/iccwsc-schedule/blob/main/schedule_availability.json";
 
         async function fetchData() {
             try {
-                const respon
+                const response = await fetch(GITHUB_API_URL, { headers: { 'Accept': 'application/vnd.github.v3.raw' }});
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                if (!data.schedule || !data.availability) throw new Error("Invalid JSON structure");
+                populateTable(data.schedule, "scheduleTable");
+                populateTable(data.availability, "availabilityTable");
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        
+        function populateTable(data, tableId) {
+            const tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = "";
+            data.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                Object.values(row).forEach(value => {
+                    const td = document.createElement("td");
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                const actionTd = document.createElement("td");
+                actionTd.innerHTML = `<button class='btn delete-btn' onclick='deleteRow(${index}, "${tableId}")'>Delete</button>`;
+                tr.appendChild(actionTd);
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function addRow(type) {
+            const tableBody = document.querySelector(`#${type}Table tbody`);
+            const tr = document.createElement("tr");
+            for (let i = 0; i < tableBody.parentElement.rows[0].cells.length - 1; i++) {
+                const td = document.createElement("td");
+                td.innerHTML = `<input type='text'/>`;
+                tr.appendChild(td);
+            }
+            const actionTd = document.createElement("td");
+            actionTd.innerHTML = `<button class='btn delete-btn' onclick='this.parentElement.parentElement.remove()'>Delete</button>`;
+            tr.appendChild(actionTd);
+            tableBody.appendChild(tr);
+        }
+
+        function deleteRow(index, tableId) {
+            document.querySelector(`#${tableId} tbody`).deleteRow(index);
+        }
+        
+        fetchData();
+    </script>
+</body>
+</html>
